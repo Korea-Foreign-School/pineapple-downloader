@@ -4,6 +4,9 @@ import hashlib
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 PINEAPPLE_CHANNEL_ID = os.getenv("PINEAPPLE_CHANNEL_ID")
