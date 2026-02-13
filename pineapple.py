@@ -15,8 +15,10 @@ AUTOMATIONS_CHANNEL_ID = os.getenv("AUTOMATIONS_CHANNEL_ID")
 PINEAPPLE_DOWNLOAD_FOLDER = os.getenv("PINEAPPLE_DOWNLOAD_FOLDER")
 FIELD_TRIP_DOWNLOAD_FOLDER = os.getenv("FIELD_TRIP_DOWNLOAD_FOLDER")
 
-print(f"🔧 Creating base folder: {PINEAPPLE_DOWNLOAD_FOLDER}")
-os.makedirs(PINEAPPLE_DOWNLOAD_FOLDER, exist_ok=True)
+SLACK_CHANNEL_ID = FIELD_TRIP_CHANNEL_ID
+DOWNLOAD_FOLDER = FIELD_TRIP_DOWNLOAD_FOLDER
+print(f"🔧 Creating base folder: {DOWNLOAD_FOLDER}")
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 # Thread lock for hash_index access
 hash_lock = Lock()
@@ -60,7 +62,7 @@ def download_file(file_data, headers, hash_index):
         file_date = None
         print(f"   ⚠️  No timestamp found")
     
-    month_path = os.path.join(PINEAPPLE_DOWNLOAD_FOLDER, month_folder)
+    month_path = os.path.join(DOWNLOAD_FOLDER, month_folder)
     os.makedirs(month_path, exist_ok=True)
     
     # Download file
@@ -109,13 +111,13 @@ def download_file(file_data, headers, hash_index):
 
 # Build hash index once
 print("\n" + "="*60)
-hash_index = build_hash_index(PINEAPPLE_DOWNLOAD_FOLDER)
+hash_index = build_hash_index(DOWNLOAD_FOLDER)
 
 # List files
 print("\n" + "="*60)
 print("🔍 Fetching file list from Slack...")
 url = "https://slack.com/api/files.list"
-params = {"channel": PINEAPPLE_CHANNEL_ID, "count": 1000}
+params = {"channel": SLACK_CHANNEL_ID, "count": 1000}
 headers = {"Authorization": f"Bearer {SLACK_TOKEN}"}
 
 response = requests.get(url, headers=headers, params=params).json()
@@ -144,7 +146,7 @@ if response.get("ok"):
     # Send simple summary
     if dates:
         dates.sort()
-        msg = f"Downloaded {len(dates)} photos ({dates[0].strftime('%d-%m-%y')} to {dates[-1].strftime('%d-%m-%y')})"
+        msg = f"Downloaded {len(dates)} photos ({dates[0].strftime('%d-%m-%y')} to {dates[-1].strftime('%d-%m-%y')}) to {DOWNLOAD_FOLDER}"
         print(f"✅ {msg}")
     else:
         msg = "No new photos to download"
